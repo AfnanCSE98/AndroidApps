@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">Guess The Gibberish</string>
+    <string-array name="questions">
+        <item>Stir range earth inks</item>
+        <item>mile hip czars healed</item>
+        <item>For tea your all diversion</item>
+        <item>ewe knight taking dumb</item>
+        <item>jazz thought hip</item>
+        <item>glow eek hard ashy am</item>
+        <item>Their heels limp shed he</item>
+        <item>pretty shack scent</item>
+        <item>sick steamy knits</item>
+        <item>Bull lag fried hay</item>
+        <item>Ham a sauna lets uh</item>
+        <item>uke ant an dell tat ruth</item>
+        <item>Van heap hack</item>
+
+    </string-array>
+
+    <string-array name="answers">
+        <item>stranger things</item>
+        <item>my lips are sealed</item>
+        <item>40 year old virgin</item>
+        <item>United Kingdom</item>
+        <item>Just the tip</item>
+        <item>khloe kardashian</item>
+        <item>The real slim shady</item>
+        <item>british Accent</item>
+        <item>Sixty Minutes</item>
+        <item>Black Friday</item>
+        <item>Amazon Alexa</item>
+        <item>you cant handle the truth</item>
+        <item>fanny pack</item>
+    </string-array>
+</resources>
