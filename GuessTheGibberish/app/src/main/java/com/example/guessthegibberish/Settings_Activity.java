@@ -5,8 +5,10 @@ import androidx.lifecycle.Lifecycle;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
@@ -24,6 +26,12 @@ public class Settings_Activity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings_);
+
+        LinearLayout ll = (LinearLayout)findViewById(R.id.ll);
+        AnimationDrawable animationDrawable = (AnimationDrawable) ll.getBackground();
+        animationDrawable.setEnterFadeDuration(2000);
+        animationDrawable.setExitFadeDuration(3000);
+        animationDrawable.start();
 
         Log.i("Settings_Activity" , "Oncreate of settings called");
         onResume();
