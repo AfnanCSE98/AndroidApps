@@ -5,8 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:id="@+id/ll"
     android:paddingLeft="50dp"
     android:paddingTop="80dp"
+    android:background="@drawable/gradient_list"
     tools:context=".MainActivity">
 
     <LinearLayout
@@ -43,7 +45,7 @@
         android:id="@+id/ans"
         android:layout_width="315dp"
         android:layout_height="80dp"
-        android:textSize="20sp"
+        android:textSize="30sp"
         android:paddingLeft="22dp"
         android:background="@drawable/tv_design"
         />

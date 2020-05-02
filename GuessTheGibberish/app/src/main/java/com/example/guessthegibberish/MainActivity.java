@@ -8,10 +8,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Shader;
+import android.graphics.drawable.AnimationDrawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,6 +26,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Random;
+
 public class MainActivity extends AppCompatActivity {
     Button bt,bt_next;
     TextView q_text;
@@ -34,7 +38,9 @@ public class MainActivity extends AppCompatActivity {
     Runnable i_handlerTask;
     MediaPlayer mp;
     Intent intent;
-    int i=0;
+    int i,no_of_ques;
+    int [] q_idx;
+    int q_serial;
     int sec;
     StringBuilder sb;
     boolean sound_state;
@@ -45,29 +51,67 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ///animation
+        LinearLayout ll = (LinearLayout)findViewById(R.id.ll);
+        AnimationDrawable animationDrawable = (AnimationDrawable) ll.getBackground();
+        animationDrawable.setEnterFadeDuration(2000);
+        animationDrawable.setExitFadeDuration(3000);
+        animationDrawable.start();
+
+
         ActionBar ab = getSupportActionBar();
         ab.setLogo(R.drawable.logo);
         ab.setDisplayUseLogoEnabled(true);
         ab.setDisplayShowHomeEnabled(true);
+
+        pref = getSharedPreferences("GuessTheGibberish" , MODE_PRIVATE);
+        editor = pref.edit();
+
+        questions = getResources().getStringArray(R.array.questions);
+        answers = getResources().getStringArray(R.array.answers);
+        no_of_ques = questions.length;
+        q_idx = new int[no_of_ques];
+        for(int i=0;i<no_of_ques;i++){
+            q_idx[i] = i;
+        }
+        shuffleArray(q_idx);
+
         StartButtonAction();
         nextButton();
 
     }
 
+    public void shuffleArray(int[] ar)
+    {
+        // If running on Java 6 or older, use `new Random()` on RHS here
+        Random rnd = new Random();
+        for (int i = ar.length - 1; i > 0; i--)
+        {
+            int index = rnd.nextInt(i + 1);
+            // Simple swap
+            int a = ar[index];
+            ar[index] = ar[i];
+            ar[i] = a;
+        }
+    }
 
     public void StartButtonAction(){
-        questions = getResources().getStringArray(R.array.questions);
-        answers = getResources().getStringArray(R.array.answers);
+
         bt = (Button)findViewById(R.id.button);
         q_text = (TextView)findViewById(R.id.q_text) ;
         ans_text = (TextView) findViewById(R.id.ans);
         mp = MediaPlayer.create(this , R.raw.tick);
         ans_text.setVisibility(View.INVISIBLE);
+        //set idx
+
+
         bt.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View v)
                     {
                         //DO SOMETHING! {RUN SOME FUNCTION ... DO CHECKS... ETC}
+                       // i = q_serial;
                         if(game_level==2)sec=6;
                         else if(game_level==1)sec = 8;
                         else if(game_level==0)sec = 10;
@@ -76,8 +120,8 @@ public class MainActivity extends AppCompatActivity {
                         final int parentHeight = parent.getHeight();
                         final int parentWidth = parent.getWidth();
 
-                        q_text.setText(questions[i++]);
-                        ///sb.append(questions[i-1]).append(",");
+                        q_text.setText(questions[q_idx[i++]]);
+
                         i_handler = new Handler();
                         i_handlerTask = new Runnable() {
 
@@ -97,8 +141,9 @@ public class MainActivity extends AppCompatActivity {
                             sec--;
                         }else{
                             ans_text.setVisibility(View.VISIBLE);
-                            ans_text.setText(answers[i-1]);
-                            ans_text.setBackgroundResource(R.color.green);
+                            ans_text.setText(answers[q_idx[i-1]]);
+                            ans_text.setBackgroundResource(R.color.lime);
+
                         }
                             i_handler.removeCallbacksAndMessages(null);
                             i_handler.postDelayed(i_handlerTask , 1000);
@@ -112,11 +157,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void nextButton(){
         bt_next = (Button)findViewById(R.id.btn_next);
-        questions = getResources().getStringArray(R.array.questions);
-        answers = getResources().getStringArray(R.array.answers);
+        //questions = getResources().getStringArray(R.array.questions);
+        //answers = getResources().getStringArray(R.array.answers);
         bt = (Button)findViewById(R.id.button);
         q_text = (TextView)findViewById(R.id.q_text) ;
         ans_text = (TextView) findViewById(R.id.ans);
+
 
 
         bt_next.setOnClickListener(
@@ -125,17 +171,17 @@ public class MainActivity extends AppCompatActivity {
                     {
                         //DO SOMETHING! {RUN SOME FUNCTION ... DO CHECKS... ETC}
                         ans_text.setText("");
-
+                        //i = q_serial;
                         if(game_level==2)sec=6;
-                        else if(game_level==1)sec = 8;
-                        else if(game_level==0)sec = 10;
+                        else if(game_level==1)sec = 7;
+                        else if(game_level==0 || game_level==-1)sec = 8;
 
                         View parent = (View) v.getParent();
                         final int parentHeight = parent.getHeight();
                         final int parentWidth = parent.getWidth();
 
-                        q_text.setText(questions[i++]);
-                        ///sb.append(questions[i-1]);
+                        q_text.setText(questions[q_idx[i++]]);
+
                         i_handler = new Handler();
                         i_handlerTask = new Runnable() {
 
@@ -156,8 +202,8 @@ public class MainActivity extends AppCompatActivity {
                                     sec--;
                                 }else{
                                     ans_text.setVisibility(View.VISIBLE);
-                                    ans_text.setText(answers[i-1]);
-                                    ans_text.setBackgroundResource(R.color.green);
+                                    ans_text.setText(answers[q_idx[i-1]]);
+                                    ans_text.setBackgroundResource(R.color.lime);
                                 }
                                 i_handler.removeCallbacksAndMessages(null);
                                 i_handler.postDelayed(i_handlerTask , 1000);
@@ -183,8 +229,10 @@ public class MainActivity extends AppCompatActivity {
 
         case R.id.settings:
             intent = new Intent(this, Settings_Activity.class);
-            startActivity(intent);
 
+            editor.putInt("game_level" , game_level);
+            editor.putBoolean("sound_state" , sound_state);
+            startActivity(intent);
             return(true);
         case R.id.exit:
             finish();
@@ -195,12 +243,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        editor.commit();
+        Log.i("MainActivity" , "pause of main called");
+    }
+
+    @Override
     protected void onResume(){
         super.onResume();
         pref = getSharedPreferences("GuessTheGibberish" , MODE_PRIVATE);
-        sound_state = pref.getBoolean("sound_state" , false);
-        game_level = pref.getInt("game_level" , 0);
-
+        sound_state = pref.getBoolean("sound_state" , true);
+        game_level = pref.getInt("game_level" , 2);
+       // q_serial = pref.getInt("q_serial" , 0);
+        Log.i("MainActivity" , "resume of main called");
     }
+
+
 }
 
