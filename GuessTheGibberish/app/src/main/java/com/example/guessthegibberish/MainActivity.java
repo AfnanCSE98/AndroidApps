@@ -40,10 +40,10 @@ public class MainActivity extends AppCompatActivity {
     Intent intent;
     int i,no_of_ques;
     int [] q_idx;
-    int q_serial;
+
     int sec;
-    StringBuilder sb;
-    boolean sound_state;
+    Toast toast;
+    boolean sound_state,activity_running;
     int game_level; ///1 for med, 0 for easy , 3 for hard
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        activity_running=true;
         ///animation
         LinearLayout ll = (LinearLayout)findViewById(R.id.ll);
         AnimationDrawable animationDrawable = (AnimationDrawable) ll.getBackground();
@@ -116,10 +116,6 @@ public class MainActivity extends AppCompatActivity {
                         else if(game_level==1)sec = 8;
                         else if(game_level==0)sec = 10;
 
-                        View parent = (View) v.getParent();
-                        final int parentHeight = parent.getHeight();
-                        final int parentWidth = parent.getWidth();
-
                         q_text.setText(questions[q_idx[i++]]);
 
                         i_handler = new Handler();
@@ -130,15 +126,10 @@ public class MainActivity extends AppCompatActivity {
                         public void run() {
                             ans_text.setVisibility(View.INVISIBLE);
                         if(sec>=1) {
-                            LayoutInflater li = getLayoutInflater();
-                            View layout = li.inflate(R.layout.time, (ViewGroup) findViewById(R.id.custom_time_toast_layout_id));
 
-
-                            Toast toast = Toast.makeText(MainActivity.this , Integer.toString(sec) , Toast.LENGTH_SHORT);
-                            toast.setGravity(Gravity.CENTER, 0, 0);
-                            toast.show();
-                            if(sound_state)mp.start();
+                            if(activity_running)tst_snd();
                             sec--;
+
                         }else{
                             ans_text.setVisibility(View.VISIBLE);
                             ans_text.setText(answers[q_idx[i-1]]);
@@ -157,8 +148,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void nextButton(){
         bt_next = (Button)findViewById(R.id.btn_next);
-        //questions = getResources().getStringArray(R.array.questions);
-        //answers = getResources().getStringArray(R.array.answers);
         bt = (Button)findViewById(R.id.button);
         q_text = (TextView)findViewById(R.id.q_text) ;
         ans_text = (TextView) findViewById(R.id.ans);
@@ -171,14 +160,9 @@ public class MainActivity extends AppCompatActivity {
                     {
                         //DO SOMETHING! {RUN SOME FUNCTION ... DO CHECKS... ETC}
                         ans_text.setText("");
-                        //i = q_serial;
                         if(game_level==2)sec=6;
                         else if(game_level==1)sec = 7;
                         else if(game_level==0 || game_level==-1)sec = 8;
-
-                        View parent = (View) v.getParent();
-                        final int parentHeight = parent.getHeight();
-                        final int parentWidth = parent.getWidth();
 
                         q_text.setText(questions[q_idx[i++]]);
 
@@ -190,15 +174,7 @@ public class MainActivity extends AppCompatActivity {
                             public void run() {
                                 ans_text.setVisibility(View.INVISIBLE);
                                 if(sec>=1) {
-                                    LayoutInflater li = getLayoutInflater();
-                                    View layout = li.inflate(R.layout.time, (ViewGroup) findViewById(R.id.custom_time_toast_layout_id));
-                                    Toast toast = Toast.makeText(MainActivity.this , Integer.toString(sec) , Toast.LENGTH_SHORT);
-                                   // Toast toast = new Toast(getApplicationContext());
-                                    toast.setGravity(Gravity.CENTER, 0, 0);
-                                   // toast.setText(Integer.toString(sec));
-
-                                    toast.show();
-                                    if(sound_state)mp.start();
+                                    if(activity_running)tst_snd();
                                     sec--;
                                 }else{
                                     ans_text.setVisibility(View.VISIBLE);
@@ -246,6 +222,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         editor.commit();
+        activity_running=false;
         Log.i("MainActivity" , "pause of main called");
     }
 
@@ -257,6 +234,19 @@ public class MainActivity extends AppCompatActivity {
         game_level = pref.getInt("game_level" , 2);
        // q_serial = pref.getInt("q_serial" , 0);
         Log.i("MainActivity" , "resume of main called");
+        activity_running = true;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        activity_running=false;
+    }
+    public void tst_snd(){
+        toast = Toast.makeText(MainActivity.this , Integer.toString(sec) , Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        if(sound_state)mp.start();
+        toast.show();
     }
 
 
