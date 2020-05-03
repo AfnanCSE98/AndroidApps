@@ -4,6 +4,10 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -20,6 +24,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -40,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
     Intent intent;
     int i,no_of_ques;
     int [] q_idx;
-
     int sec;
     Toast toast;
     boolean sound_state,activity_running;
@@ -72,8 +77,8 @@ public class MainActivity extends AppCompatActivity {
         answers = getResources().getStringArray(R.array.answers);
         no_of_ques = questions.length;
         q_idx = new int[no_of_ques];
-        for(int i=0;i<no_of_ques;i++){
-            q_idx[i] = i;
+        for(int j=0;j<no_of_ques;j++){
+            q_idx[j] = j;
         }
         shuffleArray(q_idx);
 
@@ -102,25 +107,23 @@ public class MainActivity extends AppCompatActivity {
         q_text = (TextView)findViewById(R.id.q_text) ;
         ans_text = (TextView) findViewById(R.id.ans);
         mp = MediaPlayer.create(this , R.raw.tick);
+        q_text.setText("");
         ans_text.setVisibility(View.INVISIBLE);
-        //set idx
-
 
         bt.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View v)
                     {
                         //DO SOMETHING! {RUN SOME FUNCTION ... DO CHECKS... ETC}
-                       // i = q_serial;
+                        i=0;
                         if(game_level==2)sec=6;
-                        else if(game_level==1)sec = 8;
-                        else if(game_level==0)sec = 10;
+                        else if(game_level==1)sec = 7;
+                        else if(game_level==0 || game_level==-1)sec = 8;
+
 
                         q_text.setText(questions[q_idx[i++]]);
-
                         i_handler = new Handler();
                         i_handlerTask = new Runnable() {
-
 
                         @Override
                         public void run() {
@@ -146,6 +149,29 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
+    public void show_alertdialogue(){
+        final Dialog dialog = new Dialog(this);
+        dialog.setCancelable(true);
+        Window window = dialog.getWindow();
+        WindowManager.LayoutParams wlp = window.getAttributes();
+
+        wlp.gravity = Gravity.BOTTOM;
+        wlp.flags &= ~WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+        window.setAttributes(wlp);
+
+        dialog.setContentView(R.layout.custom);
+        Button quitButton = (Button) dialog.findViewById(R.id.dialogButtonOK);
+        //Button noButton = (Button) dialog.findViewById(R.id.dialogButtonNO);
+        quitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                finish();
+            }
+        });
+        dialog.show();
+
+    }
     public void nextButton(){
         bt_next = (Button)findViewById(R.id.btn_next);
         bt = (Button)findViewById(R.id.button);
@@ -168,8 +194,6 @@ public class MainActivity extends AppCompatActivity {
 
                         i_handler = new Handler();
                         i_handlerTask = new Runnable() {
-
-
                             @Override
                             public void run() {
                                 ans_text.setVisibility(View.INVISIBLE);
@@ -180,6 +204,9 @@ public class MainActivity extends AppCompatActivity {
                                     ans_text.setVisibility(View.VISIBLE);
                                     ans_text.setText(answers[q_idx[i-1]]);
                                     ans_text.setBackgroundResource(R.color.lime);
+                                    if(i>=no_of_ques){
+                                        show_alertdialogue();
+                                    }
                                 }
                                 i_handler.removeCallbacksAndMessages(null);
                                 i_handler.postDelayed(i_handlerTask , 1000);
@@ -232,7 +259,6 @@ public class MainActivity extends AppCompatActivity {
         pref = getSharedPreferences("GuessTheGibberish" , MODE_PRIVATE);
         sound_state = pref.getBoolean("sound_state" , true);
         game_level = pref.getInt("game_level" , 2);
-       // q_serial = pref.getInt("q_serial" , 0);
         Log.i("MainActivity" , "resume of main called");
         activity_running = true;
     }
