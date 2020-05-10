@@ -1,10 +1,15 @@
 package com.example.mazemusti;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Looper;
+import android.os.Message;
+import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.View;
 
@@ -17,6 +22,11 @@ import java.util.Iterator;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Stack;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.lang.Runnable;
+import android.os.Handler;
+import android.widget.Toast;
 
 public class GameView extends View {
 
@@ -26,7 +36,11 @@ public class GameView extends View {
     private static float cellsize,hMargin , vMargin;
     private Paint paint,player;
     private  boolean prothom=true;
-    private ArrayList<Cell> path=new ArrayList<>();
+    private Stack<Cell> st = new Stack<>();
+    private Cell tmp;
+    Handler  mHandler = new Handler();
+    Runnable handlerTask;
+    MainActivity mainActivity=new MainActivity();
     public GameView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 
@@ -40,7 +54,7 @@ public class GameView extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(final Canvas canvas) {
         canvas.drawColor(Color.BLUE);
         int width = getWidth();
         int height = getHeight();
@@ -65,17 +79,57 @@ public class GameView extends View {
         }
         prothom=false;
         ///coloring path
-        Cell tmp;
+        Cell blk,src=cells[0][0];
         int margin = (int)cellsize/10;
-        for(int i=0;i<path.size();i++){
-            tmp =  path.get(i);
-            if(tmp.inpath){
-                canvas.drawRect(tmp.col*cellsize+margin , tmp.row*cellsize+margin , (tmp.col+1)*cellsize-margin , (tmp.row+1)*cellsize-margin , player);
-                tmp.inpath = false;
+        blk = cells[col-1][row-1];
+
+       while (blk.parent!=null){
+           st.push(blk);
+           blk=blk.parent;
+       }
+       st.push(cells[0][0]);//this stack stores the path from src to dest
+       /* handler = new Handler();
+        handlerTask = new Runnable() {
+            int margin = (int)cellsize/10;
+            @Override
+            public void run() {
+                if(!st.empty()){
+                    //handler.removeCallbacks(this);
+                    tmp=st.pop();
+                }
+                System.out.println(""+tmp.col  );
+                //canvas.drawRect(tmp.col*cellsize+margin , tmp.row*cellsize+margin , (tmp.col+1)*cellsize-margin , (tmp.row+1)*cellsize-margin , player);
+                Toast.makeText(getContext(), ""+tmp.col, Toast.LENGTH_LONG).show();
+                canvas.drawCircle((tmp.col*cellsize+(tmp.col+1)*cellsize)/2 , (tmp.row*cellsize+(tmp.row+1)*cellsize)/2 , 10 , player);
+                //Toast.makeText(getContext(), "This is my Toast message!", Toast.LENGTH_LONG).show();
+
+                handler.postDelayed(handlerTask , 1000);
             }
-        }
+
+        };
+        handlerTask.run();*/
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+
+            @Override
+            public void run() {
+                // Your logic here...
+                if(!st.empty()){
+                    tmp=st.pop();
+                }
+
+                mainActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        System.out.println(""+tmp.col  );
+                        canvas.drawCircle((tmp.col*cellsize+(tmp.col+1)*cellsize)/2 , (tmp.row*cellsize+(tmp.row+1)*cellsize)/2 , 10 , player);
+                    }
+                });
+            }
+        }, 0, 1000); // End of your timer code.
 
     }
+
 
     private void Create_Maze(){
         Stack<Cell> st = new Stack<>();
@@ -107,6 +161,7 @@ public class GameView extends View {
 
     private void dfsSolve(){
        Cell src = cells[0][0];
+       src.parent = null;
        dfs(src);
     }
 
@@ -114,26 +169,25 @@ public class GameView extends View {
         Cell nxt=null;
         int r=src.row,c=src.col;
         src.inpath=true;
-        path.add(src);
         //invalidate();
         for(int i=0;i<4;i++){
-          if(i==0 && r>0){
-              nxt = cells[c][r-1];
+          if(i==0 && r>0 && !src.top){
+              if(!cells[c][r-1].botttom)nxt = cells[c][r-1];
           }
-          else if(i==1 && c<col-1){
-              nxt = cells[c+1][r];
+          else if(i==1 && c<col-1 && !src.right){
+              if(!cells[c+1][r].left)nxt = cells[c+1][r];
           }
-          else if(i==2 && r<row-1){
-              nxt = cells[c][r+1];
+          else if(i==2 && r<row-1 && !src.botttom){
+              if(!cells[c][r+1].top)nxt = cells[c][r+1];
           }
-          else if(i==3 && c>0){
-              nxt = cells[c-1][r];
+          else if(i==3 && c>0 && !src.left){
+             if(!cells[c-1][r].right) nxt = cells[c-1][r];
           }
           if(nxt!=null && !nxt.inpath){
               nxt.inpath=true;
-              path.add(nxt);
+              nxt.parent=src;
               //invalidate();
-              //if(nxt.col==col-1 && nxt.row==row-1)return;
+              if(nxt.col==col-1 && nxt.row==row-1)return;
               dfs(nxt);
           }
         }
@@ -170,6 +224,7 @@ public class GameView extends View {
 }
 class Cell{
     boolean top=true,botttom=true,left=true,right=true,visited=false,checked=false,inpath=false;
+    Cell parent;
     int col,row;
     public Cell(int col,int row){
         this.col = col;this.row=row;
