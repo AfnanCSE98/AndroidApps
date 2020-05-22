@@ -2,8 +2,11 @@ package com.example.catchtheball;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
@@ -43,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Class
     private Timer timer;
+    private SoundPlayer sound;
     private Handler handler = new Handler();
     /*private SoundPlayer soundPlayer;*/
 
@@ -50,6 +54,11 @@ public class MainActivity extends AppCompatActivity {
     private boolean start_flag = false; ///checking game start
     private boolean action_flag = false;///controlling box movement
     private boolean pink_flag = false;///whether pink ball will emerge
+
+    ///sharedPreference for highScore
+    SharedPreferences sp ;
+    SharedPreferences.Editor editor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +74,11 @@ public class MainActivity extends AppCompatActivity {
         imageRight = getResources().getDrawable(R.drawable.box_right);
         scoreLabel = findViewById(R.id.scoreLabel);
         highScoreLabel = findViewById(R.id.highScoreLabel);
+        sound = new SoundPlayer(this);
+        //highScore
+        sp = getSharedPreferences("GAME_DATA", Context.MODE_PRIVATE);
+        highScore = sp.getInt("HIGH_SCORE_KEY" , 0);
+        highScoreLabel.setText("High Score : " + highScore);
     }
 
     public static int getScreenWidth() {
@@ -78,16 +92,16 @@ public class MainActivity extends AppCompatActivity {
         ///timecount
         timeCount+=20;
         ///orange
-        orangeY += 12;
+        orangeY += 15;
         if(isBallCaptured(orange)){
             score+=10;
             orangeY = 0;
-            orangeX = rand.nextInt(frameWidth);
+            orangeX =  (float) Math.floor(Math.random()*(frameWidth - orange.getWidth()));
+            sound.playHitOrangeSound();
         }
         if(orangeY>=frameHeight){
             orangeY = 0;
-            if(frameWidth-(int)orangeX>0) orangeX = rand.nextInt(frameWidth-(int)orangeX);
-            else orangeX = rand.nextInt(frameWidth);
+            orangeX =  (float) Math.floor(Math.random()*(frameWidth - orange.getWidth()));
 
         }
         orange.setY(orangeY);
@@ -97,46 +111,50 @@ public class MainActivity extends AppCompatActivity {
         if(timeCount%10000==0 && !pink_flag){
             pink_flag = true;
         }
-        if(pink_flag)pinkY+=15;
+        if(pink_flag)pinkY+=18;
         if(isBallCaptured(pink)){
             score += 30;
             pinkY = -100;
-            if(frameWidth-(int)pinkX>0)pinkX = rand.nextInt(frameWidth-(int)pinkX);
-            else pinkX = rand.nextInt(frameWidth);
+            pinkX =  (float) Math.floor(Math.random()*(frameWidth - pink.getWidth()));
+            if(frameWidth<initialFrameWidth)changeWidth(frameWidth*105/100);
             pink_flag = false;
+            sound.playHitPinkSound();
         }
         if(pinkY>=frameHeight){
             pinkY = -100;
-            if(frameWidth-(int)pinkX>0)pinkX = rand.nextInt(frameWidth-(int)pinkX);
-            else pinkX = rand.nextInt(frameWidth);
+            pinkX =  (float) Math.floor(Math.random()*(frameWidth - pink.getWidth()));
             pink_flag = false;
         }
         pink.setY(pinkY);
         pink.setX(pinkX);
 
         ///black
-        blackY+=18;
+        blackY+=22;
         if(isBallCaptured(black)){
             blackY = 0;
             frameWidth = frameWidth*80/100;
+            changeWidth(frameWidth);
+            if(frameWidth-boxX<=boxSize){MoveBoxToLeft();}///if devours black while at the rightest position , move box to left
             if(frameWidth<=boxSize){
                 gameOver();
             }
-            if(frameWidth-(int)blackX>0)blackX = rand.nextInt(frameWidth-(int)blackX);
-            else blackX = rand.nextInt(frameWidth);
-            changeWidth(frameWidth);
+            blackX =  (float) Math.floor(Math.random()*(frameWidth - black.getWidth()));
+            sound.playHitBlackSound();
         }
         if(blackY>=frameHeight){
             blackY = 0;
-            if(frameWidth-(int)blackX>0)blackX = rand.nextInt(frameWidth-(int)blackX);
-            else blackX = rand.nextInt(frameWidth);
+            blackX =  (float) Math.floor(Math.random()*(frameWidth - black.getWidth()));
         }
         black.setX(blackX);
         black.setY(blackY);
         ///score
         scoreLabel.setText("Score : " + score);
     }
-
+    public void MoveBoxToLeft(){
+       /* if(frameWidth-boxX<=box.getWidth())*/
+            box.setX(frameWidth-boxSize);
+            boxX = box.getX();
+    }
     public void changeWidth(int width){
         ViewGroup.LayoutParams params = gameFrame.getLayoutParams();
         params.width = width;
@@ -150,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
         start_flag = false;
 
         try {
-            TimeUnit.SECONDS.sleep(1);
+            TimeUnit.SECONDS.sleep(2);///sleep for 1 second before going to startlayout
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -166,6 +184,9 @@ public class MainActivity extends AppCompatActivity {
             highScore = score;
             highScoreLabel.setText("High Score : " + highScore);
         }
+        editor = sp.edit();
+        editor.putInt("HIGH_SCORE_KEY" , highScore);
+        editor.commit();
 
     }
     public boolean isBallCaptured(ImageView ball){
@@ -266,6 +287,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
     public void quitGame(View view){
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            finishAndRemoveTask();
+        } else {
+            finish();
+        }
     }
 }

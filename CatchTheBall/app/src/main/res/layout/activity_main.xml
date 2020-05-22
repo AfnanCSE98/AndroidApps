@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/bg"
+    android:background="@drawable/bg3"
     tools:context=".MainActivity">
 
     <TextView
@@ -31,7 +31,7 @@
             android:id="@+id/box"
             android:layout_width="44dp"
             android:layout_height="44dp"
-            android:src="@drawable/box_right"
+            android:src="@drawable/box2"
             android:layout_gravity="bottom"
             android:visibility="invisible"/>
 

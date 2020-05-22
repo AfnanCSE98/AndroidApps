@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Catch The Ball</string>
+    <string name="GAME_DATA">Game_Data</string>
+    <string name="HIGH_SCORE_KEY">High_Score_Key</string>
 </resources>
