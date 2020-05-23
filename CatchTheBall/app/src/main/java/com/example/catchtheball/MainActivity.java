@@ -3,12 +3,14 @@ package com.example.catchtheball;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +18,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Random;
 import java.util.Timer;
@@ -32,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
     ///pictures
     private ImageView box,black,pink,orange;
-    private Drawable imageRight , imageLeft;
+    /*private Drawable imageRight , imageLeft;*/
 
     ///size
     private int boxSize;//sq box so width=height
@@ -54,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean start_flag = false; ///checking game start
     private boolean action_flag = false;///controlling box movement
     private boolean pink_flag = false;///whether pink ball will emerge
+    private boolean soundOn = true;
 
     ///sharedPreference for highScore
     SharedPreferences sp ;
@@ -70,8 +74,8 @@ public class MainActivity extends AppCompatActivity {
         orange = findViewById(R.id.orange);
         pink = findViewById(R.id.pink);
         black = findViewById(R.id.black);
-        imageLeft = getResources().getDrawable(R.drawable.box_left);
-        imageRight = getResources().getDrawable(R.drawable.box_right);
+       /* imageLeft = getResources().getDrawable(R.drawable.box_left);
+        imageRight = getResources().getDrawable(R.drawable.box_right);*/
         scoreLabel = findViewById(R.id.scoreLabel);
         highScoreLabel = findViewById(R.id.highScoreLabel);
         sound = new SoundPlayer(this);
@@ -97,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
             score+=10;
             orangeY = 0;
             orangeX =  (float) Math.floor(Math.random()*(frameWidth - orange.getWidth()));
-            sound.playHitOrangeSound();
+            if(soundOn)sound.playHitOrangeSound();
         }
         if(orangeY>=frameHeight){
             orangeY = 0;
@@ -116,9 +120,9 @@ public class MainActivity extends AppCompatActivity {
             score += 30;
             pinkY = -100;
             pinkX =  (float) Math.floor(Math.random()*(frameWidth - pink.getWidth()));
-            if(frameWidth<initialFrameWidth)changeWidth(frameWidth*105/100);
+            if(frameWidth<initialFrameWidth)changeWidth(frameWidth*115/100);
             pink_flag = false;
-            sound.playHitPinkSound();
+            if(soundOn)sound.playHitPinkSound();
         }
         if(pinkY>=frameHeight){
             pinkY = -100;
@@ -133,17 +137,17 @@ public class MainActivity extends AppCompatActivity {
         if(isBallCaptured(black)){
             blackY = 0;
             frameWidth = frameWidth*80/100;
+            if(soundOn)sound.playHitBlackSound();
             changeWidth(frameWidth);
             if(frameWidth-boxX<=boxSize){MoveBoxToLeft();}///if devours black while at the rightest position , move box to left
             if(frameWidth<=boxSize){
                 gameOver();
             }
-            blackX =  (float) Math.floor(Math.random()*(frameWidth - black.getWidth()));
-            sound.playHitBlackSound();
+            blackX =  (float) Math.floor(Math.random()*(frameWidth - black.getWidth()*9/11));
         }
         if(blackY>=frameHeight){
             blackY = 0;
-            blackX =  (float) Math.floor(Math.random()*(frameWidth - black.getWidth()));
+            blackX =  (float) Math.floor(Math.random()*(frameWidth - black.getWidth()*9/11));
         }
         black.setX(blackX);
         black.setY(blackY);
@@ -292,5 +296,22 @@ public class MainActivity extends AppCompatActivity {
         } else {
             finish();
         }
+    }
+    @Override
+    public void onBackPressed() {
+        soundOn = false;
+        super.onBackPressed();
+    }
+    @Override
+    protected void onStop()///called when home buttton is pressed
+    {
+        super.onStop();
+        soundOn = false;
+    }
+
+    @Override
+    protected void onResume() {
+        soundOn = true;
+        super.onResume();
     }
 }
