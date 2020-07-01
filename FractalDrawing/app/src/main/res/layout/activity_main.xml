@@ -35,6 +35,12 @@
                 android:text="Sierpinski Triangle"
                 android:id="@+id/sierpinski" />
 
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Fractal Tree"
+                android:id="@+id/tree" />
+
         </LinearLayout>
 
     </HorizontalScrollView>

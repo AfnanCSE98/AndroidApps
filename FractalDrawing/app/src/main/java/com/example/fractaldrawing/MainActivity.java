@@ -16,7 +16,8 @@ public class MainActivity extends AppCompatActivity {
     private FractalView fv ;
     private KochView kv;
     private SierpinskiView sv;
-    Button c_curve , koch , sierpinski;
+    private TreeView tv;
+    Button c_curve , koch , tree ,sierpinski;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +50,15 @@ public class MainActivity extends AppCompatActivity {
                 ll.removeAllViews();
                 sv = new SierpinskiView(MainActivity.this);
                 ll.addView(sv , 0);
+            }
+        });
+
+        tree = findViewById(R.id.tree);
+        tree.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                ll.removeAllViews();
+                tv = new TreeView(MainActivity.this);
+                ll.addView(tv , 0);
             }
         });
 

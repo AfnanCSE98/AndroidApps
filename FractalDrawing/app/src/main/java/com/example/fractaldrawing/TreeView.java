@@ -14,22 +14,22 @@ import androidx.annotation.RequiresApi;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static java.lang.Math.sqrt;
 
-public class KochView extends View{
-    private Koch mFractal;
-    private int level=0;
-    private float x1,x2,y1,y2,x3,y3;
+public class TreeView extends View {
+    private Tree mFractal;
+    private int level=1;
+    private int x1,x2,y1,y2,x3,y3;
     private Timer timer;
 
     private ScaleGestureDetector mScaleDetector;///for zooming purpose
     private float mScaleFactor = 1.f;
 
-    public KochView(Context context){
+    public TreeView(Context context){
         super(context);
-        mFractal = new Koch();
-
+        mFractal = new Tree();
         timer = new Timer();///starting timer to draw the path dynamically
         timer.schedule(new TimerTask() {
             @Override
@@ -38,32 +38,29 @@ public class KochView extends View{
                 invalidate();
                 level++;
 
-                if(level==4){cancelTimer();}
+                if(level==10){cancelTimer();}
             }
         }, 0, 1000);
 
-        mScaleDetector = new ScaleGestureDetector(context, new KochView.ScaleListener());
+        mScaleDetector = new ScaleGestureDetector(context, new TreeView.ScaleListener());
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void onDraw(Canvas canvas){
-        x1 = canvas.getWidth()/2-350;
-        y1 = canvas.getHeight()/2 ;
-        x2 = x1+700;
-        y2=y1;
 
-        x3 = x1 + 350;
-        y3 = (float) (y1 - (float)350*sqrt(3));
+        x1 = canvas.getWidth()/2;
+        y1 = canvas.getHeight() -100 ;
 
         super.onDraw(canvas);
         canvas.save();
         canvas.scale(mScaleFactor, mScaleFactor);
 
-        canvas.drawRGB(255,255,255);
-        mFractal.drawfractal1(canvas , x1 , y1 , x2 , y2 ,level);
-        mFractal.drawfractal1(canvas , x3 , y3 , x1 , y1 ,level);
-        mFractal.drawfractal1(canvas , x2 , y2 , x3 , y3 ,level);
 
+        int r = ThreadLocalRandom.current().nextInt(0, 256);
+        int g = ThreadLocalRandom.current().nextInt(0, 256);
+        int b = ThreadLocalRandom.current().nextInt(0, 256);
+        canvas.drawRGB(r,g,b);
+        mFractal.drawfractal(canvas , x1,y1,90 , level);
         canvas.restore();
 
     }

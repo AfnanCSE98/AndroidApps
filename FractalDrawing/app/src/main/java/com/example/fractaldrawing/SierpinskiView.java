@@ -38,9 +38,9 @@ public class SierpinskiView extends View {
                 invalidate();
                 level++;
 
-                if(level==4){cancelTimer();}
+                if(level==5){cancelTimer();}
             }
-        }, 0, 2500);
+        }, 0, 1000);
 
         mScaleDetector = new ScaleGestureDetector(context, new SierpinskiView.ScaleListener());
     }
